@@ -1,15 +1,6 @@
-# skill: java-code-convention
+# 코드 컨벤션
 
-## 목적
-이 프로젝트의 Java 소스 파일을 생성하거나 수정할 때 반드시 이 컨벤션을 따른다.
-
----
-
-## 적용 시점
-아래 요청 시 이 스킬을 활성화한다:
-- 엔티티 / 리포지토리 / 서비스 / 컨트롤러 / 요청 DTO / 응답 DTO 생성
-- 새 기능, 엔드포인트, 도메인 추가
-- 기존 코드의 컨벤션 위반 검토 및 수정
+이 프로젝트의 소스 파일을 생성하거나 수정할 때 반드시 이 컨벤션을 따른다.
 
 ---
 
@@ -32,14 +23,24 @@ com.example.demo/
 
 ---
 
-## 엔티티 규칙
+## 어노테이션 순서
+
+| 레이어         | 순서                                                                         |
+| -------------- | ---------------------------------------------------------------------------- |
+| Entity         | `@NoArgsConstructor` → `@Data` → `@Entity` → `@Table(name = "{도메인}_tb")` |
+| Service        | `@Transactional(readOnly = true)` → `@RequiredArgsConstructor` → `@Service`  |
+| Controller     | `@RequiredArgsConstructor` → `@Controller`                                   |
+| RestController | `@RequiredArgsConstructor` → `@RestController` (별도 파일, `/api` 접두사)    |
+
+---
+
+## Entity 규칙
 
 ```java
-// 어노테이션 순서: @NoArgsConstructor → @Data → @Entity → @Table
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "{domain}_tb")   // 테이블명: {domain}_tb (snake_case + _tb 접미사)
+@Table(name = "{domain}_tb")
 public class {Domain} {
 
     @Id
@@ -65,30 +66,18 @@ public class {Domain} {
 ```
 
 **반드시 지킬 것**
+- PK 타입: `Integer` (`Long` 사용 금지), 전략: `GenerationType.IDENTITY`
 - `@Builder`는 생성자에만 — 클래스 레벨 선언 금지
-- 모든 연관관계: `FetchType.LAZY` — EAGER 금지
-- PK 타입: `Integer` (`Long` 사용 금지)
-- 테이블명: `{domain}_tb`
-- 생성일: `@CreationTimestamp` + `LocalDateTime createdAt`
 - 컬렉션 필드(`List`, `Set`)는 `@Builder` 생성자에 포함하지 않는다
+- 모든 연관관계: `FetchType.LAZY` — EAGER 금지
+- 생성일: `@CreationTimestamp` + `LocalDateTime createdAt`
+- 테이블명: `{domain}_tb`
 
 ---
 
-## 리포지토리 규칙
+## Service 규칙
 
 ```java
-public interface {Domain}Repository extends JpaRepository<{Domain}, Integer> {
-    // JpaRepository<Entity, PK타입>
-    // 필요한 경우에만 커스텀 쿼리 메서드 추가
-}
-```
-
----
-
-## 서비스 규칙
-
-```java
-// 어노테이션 순서: @Transactional(readOnly=true) → @RequiredArgsConstructor → @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
@@ -97,9 +86,9 @@ public class {Domain}Service {
     private final {Domain}Repository {domain}Repository;
 
     // 읽기 메서드: 추가 어노테이션 불필요 (클래스 레벨 readOnly=true 상속)
-    public {Domain}Response.Detail findById(Integer id) {
+    public {Domain}Response.Max findById(Integer id) {
         {Domain} entity = {domain}Repository.findById(id).orElseThrow(...);
-        return new {Domain}Response.Detail(entity);  // DTO 변환은 여기서
+        return new {Domain}Response.Max(entity);  // DTO 변환은 여기서
     }
 
     // 쓰기 메서드: @Transactional 별도 선언 필수
@@ -114,15 +103,13 @@ public class {Domain}Service {
 - 클래스 레벨 `@Transactional(readOnly = true)` 항상 선언
 - 쓰기 메서드(`save`, `update`, `delete`)에는 `@Transactional` 개별 선언
 - DTO는 Service 안에서 생성하여 반환 — 날(raw) Entity를 Controller로 전달 금지
-- Entity를 Controller로 넘기지 않는다
 
 ---
 
-## 컨트롤러 규칙
+## Controller 규칙
 
 ```java
 // SSR 컨트롤러 — Mustache 뷰 반환
-// 어노테이션 순서: @RequiredArgsConstructor → @Controller
 @RequiredArgsConstructor
 @Controller
 public class {Domain}Controller {
@@ -140,7 +127,6 @@ public class {Domain}Controller {
 
 ```java
 // REST 컨트롤러 — 반드시 별도 파일로 분리, 주소에 /api 접두사 사용
-// 어노테이션 순서: @RequiredArgsConstructor → @RestController
 @RequiredArgsConstructor
 @RestController
 public class {Domain}ApiController {
@@ -155,24 +141,23 @@ public class {Domain}ApiController {
 ```
 
 **반드시 지킬 것**
-- SSR(`@Controller`)과 REST(`@RestController`)는 **별도 파일로 분리**한다
-  - SSR: `{Domain}Controller.java`
-  - REST: `{Domain}ApiController.java`
-- REST 컨트롤러의 모든 엔드포인트 주소는 `/api`를 접두사로 붙인다
-- Service와 함께 `HttpSession`을 생성자로 주입 (SSR 컨트롤러)
-- Mustache 컨트롤러: 반환값은 `String` (템플릿 경로)
-- REST 컨트롤러: `Resp.ok()` / `Resp.fail()` 사용
+- SSR(`@Controller`)과 REST(`@RestController`)는 **별도 파일로 분리**
+- REST 엔드포인트 주소는 `/api` 접두사 필수
+- SSR: `HttpSession` 생성자 주입, 반환값 `String` (템플릿 경로)
+- REST: `Resp.ok()` / `Resp.fail()` 사용
 
 ---
 
-## 요청 DTO 규칙
+## DTO 규칙
+
+### 요청 DTO
 
 ```java
 // 외부 클래스: 어노테이션 없음
 public class {Domain}Request {
 
     @Data                          // @Data는 내부 클래스에만
-    public static class Save {     // 이름 = 기능명 (Save, Update, Delete, Login ...)
+    public static class Save {     // 이름 = 기능명 (Save, Update, Login, Join ...)
         private String field1;
         private String field2;
     }
@@ -184,62 +169,84 @@ public class {Domain}Request {
 }
 ```
 
-**반드시 지킬 것**
-- 도메인당 파일 하나: `{Domain}Request.java`
-- 외부 클래스에는 어노테이션 없음
-- 내부 static class 이름: 기능명 (`Save`, `Update`, `Delete`, `Login` 등)
-- `@Data`는 내부 static class에만 선언
-
----
-
-## 응답 DTO 규칙
+### 응답 DTO
 
 ```java
 // 외부 클래스: 어노테이션 없음
 public class {Domain}Response {
 
     @Data
-    public static class Detail {   // 단건 조회용
+    public static class Max {      // 테이블 전체 컬럼 (상세·목록 겸용)
         private Integer id;
-        // ... 상세 화면에 필요한 필드 ...
+        private String title;
+        private String content;
+        private LocalDateTime createdAt;
 
-        // 생성자에서 Entity → DTO 변환
-        public Detail({Domain} entity) {
+        public Max({Domain} entity) {
             this.id = entity.getId();
-            // ...
+            this.title = entity.getTitle();
+            this.content = entity.getContent();
+            this.createdAt = entity.getCreatedAt();
         }
     }
 
     @Data
-    public static class Items {    // 목록 조회용
+    public static class Min {      // 최소 정보 (id + 대표값, 세션 저장 등)
         private Integer id;
-        // ... 목록 화면에 필요한 최소 필드 ...
+        private String title;
 
-        public Items({Domain} entity) {
+        public Min({Domain} entity) {
             this.id = entity.getId();
-            // ...
+            this.title = entity.getTitle();
+        }
+    }
+
+    @Data
+    public static class Detail {   // 조인 포함 확장 정보
+        private Integer id;
+        private String title;
+        private String content;
+        private String username;   // 조인된 User 정보
+
+        public Detail({Domain} entity) {
+            this.id = entity.getId();
+            this.title = entity.getTitle();
+            this.content = entity.getContent();
+            this.username = entity.getUser().getUsername();
+        }
+    }
+
+    @Data
+    public static class Option {   // 셀렉트박스/드롭다운용
+        private Integer id;
+        private String name;
+
+        public Option({Domain} entity) {
+            this.id = entity.getId();
+            this.name = entity.getTitle();
         }
     }
 }
 ```
 
 **반드시 지킬 것**
-- 도메인당 파일 하나: `{Domain}Response.java`
-- 외부 클래스에는 어노테이션 없음
-- 내부 static class 이름: 용도명 (`Detail`, `Items`, `Summary` 등)
+- 도메인당 파일 하나씩: `{Domain}Request.java`, `{Domain}Response.java`
+- 외부 클래스에는 어노테이션 없음 / `@Data`는 내부 static class에만
+- Request 내부 클래스 이름: 기능명 (`Save`, `Update`, `Login`, `Join`)
+- Response 내부 클래스 이름: 데이터 범위 기준
+  - `Max`: 테이블 전체 컬럼 (상세·목록 겸용)
+  - `Min`: 최소 정보 (id + 대표값)
+  - `Detail`: 조인 포함 확장 정보
+  - `Option`: 셀렉트박스/드롭다운용
 - Entity → DTO 변환은 생성자 또는 정적 팩토리 메서드로 처리
 
 ---
 
-## 공통 응답 (Resp)
+## 공통 응답
 
 ```java
-// 성공 응답
-return Resp.ok(dto);                           // status 200, body = dto
-
-// 실패 응답
-return Resp.fail(HttpStatus.BAD_REQUEST, "오류 메시지");
-return Resp.fail(HttpStatus.UNAUTHORIZED, "오류 메시지");
+return Resp.ok(dto);                                    // 성공: status 200
+return Resp.fail(HttpStatus.BAD_REQUEST, "오류 메시지");  // 실패
 ```
 
 - 위치: `_core/utils/Resp.java`
@@ -249,34 +256,33 @@ return Resp.fail(HttpStatus.UNAUTHORIZED, "오류 메시지");
 
 ## 프론트엔드 (JavaScript) 규칙
 
-- Ajax 호출(fetch)은 반드시 `async` / `await`으로 작성한다
-- DOM 요소 접근은 `document.querySelector`만 사용한다 (`getElementById` 등 금지)
-- POST 요청 방식:
-  - **기본**: `<form>` 태그 + `name` 속성으로 서버에 직접 제출 (페이지 이동 방식, `x-www-form-urlencoded`)
-  - **예외**: Ajax가 필요한 경우(중복체크, 부분 갱신 등)에만 `fetch` 사용
+- Ajax(fetch)는 `async` / `await` 사용
+- DOM 접근: `document.querySelector` 사용 (`getElementById` 등 금지)
+- POST 요청 기본: `<form>` 태그 + `name` 속성으로 제출 (페이지 이동 방식)
+- Ajax가 필요한 경우만 fetch 사용 (중복체크, 부분 갱신 등)
 
 ---
 
-## 네이밍 규칙
+## 네이밍
 
-| 대상 | 컨벤션 | 예시 |
-|------|--------|------|
-| 클래스 | PascalCase | `BoardService` |
-| 메서드 / 변수 | camelCase | `findAll`, `userId` |
-| 테이블명 | snake_case + `_tb` | `board_tb` |
-| 패키지 | lowercase | `board`, `_core` |
-| 요청 DTO 내부 클래스 | 기능명 | `Save`, `Update` |
-| 응답 DTO 내부 클래스 | 용도명 | `Detail`, `Items` |
+| 대상                  | 컨벤션       | 예시                             |
+| --------------------- | ------------ | -------------------------------- |
+| 클래스/파일           | PascalCase   | `BoardService`                   |
+| 메서드/변수           | camelCase    | `findAll`                        |
+| 테이블                | snake_case + `_tb` | `board_tb`                 |
+| 패키지                | lowercase    | `board`, `_core`                 |
+| Request 내부 클래스   | 기능명       | `Save`, `Update`, `Login`        |
+| Response 내부 클래스  | 데이터 범위  | `Max`, `Min`, `Detail`, `Option` |
 
 ---
 
-## 전역 제약
+## 설정
 
-| 규칙 | 값 / 강제 사항 |
-|------|----------------|
-| OSIV | `false` — 절대 활성화하지 않는다 |
-| Fetch 전략 | 항상 `LAZY` — `EAGER` 금지 |
-| 배치 사이즈 | `default_batch_fetch_size=10` |
-| 인증 방식 | `HttpSession` — 별도 요청 없으면 Spring Security 사용 금지 |
-| DTO 생성 위치 | Service 레이어에서만 |
-| Entity 노출 | Controller에 Entity를 절대 전달하지 않는다 |
+| 규칙         | 값 / 강제 사항                                       |
+| ------------ | ---------------------------------------------------- |
+| OSIV         | `false` — 절대 활성화하지 않는다                     |
+| Fetch 전략   | 항상 `LAZY` — `EAGER` 금지                           |
+| 배치 사이즈  | `default_batch_fetch_size=10`                         |
+| 인증 방식    | `HttpSession` — 별도 요청 없으면 Spring Security 금지 |
+| DTO 생성     | Service 레이어에서만                                  |
+| Entity 노출  | Controller에 Entity를 절대 전달하지 않는다            |

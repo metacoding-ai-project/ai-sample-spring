@@ -35,8 +35,12 @@
 
 ## DTO 규칙
 
-- `{Domain}Request.java` — 내부 static class를 기능명으로 (`Save`, `Update`)
-- `{Domain}Response.java` — 내부 static class를 용도명으로 (`Detail`, `Items`)
+- `{Domain}Request.java` — 내부 static class를 기능명으로 (`Save`, `Update`, `Login`, `Join`)
+- `{Domain}Response.java` — 내부 static class를 데이터 범위로:
+  - `Max`: 테이블 전체 컬럼 (상세·목록 겸용)
+  - `Min`: 최소 정보 (id + 대표값, 세션 저장 등)
+  - `Detail`: 조인 포함 확장 정보 (Board + User 등)
+  - `Option`: 셀렉트박스/드롭다운용 (id + name)
 - 외부 클래스: 어노테이션 없음 / 내부 클래스: `@Data`
 - Entity → DTO 변환: 생성자 또는 정적 팩토리 메서드
 
