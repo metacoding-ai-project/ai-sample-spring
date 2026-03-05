@@ -1,230 +1,68 @@
-# 프로젝트 코드 컨벤션
+# 코드 컨벤션 요약
 
-## 1. 패키지 구조
+## 패키지 구조
 
-도메인 단위의 **플랫 패키지 구조**를 사용한다.
-레이어(layer) 기준이 아닌 도메인(domain) 기준으로 폴더를 구성한다.
+도메인 기준 플랫 구조: `_core/`, `board/`, `user/` ...
 
-```
-com.example.demo/
-├── DemoApplication.java
-├── _core/                  # 공통 유틸 (도메인 무관)
-│   └── utils/
-│       └── Resp.java
-├── board/                  # 게시글 도메인
-│   ├── Board.java
-│   ├── BoardController.java
-│   ├── BoardService.java
-│   ├── BoardRepository.java
-│   ├── BoardRequest.java
-│   ├── BoardResponse.java
-│   └── Reply.java
-└── user/                   # 유저 도메인
-    ├── User.java
-    ├── UserController.java
-    ├── UserService.java
-    ├── UserRepository.java
-    ├── UserRequest.java
-    └── UserResponse.java
-```
+각 도메인 폴더에 Entity, Controller, ApiController, Service, Repository, Request, Response 포함
 
----
+## 어노테이션 순서
 
-## 2. Entity
+| 레이어         | 순서                                                                         |
+| -------------- | ---------------------------------------------------------------------------- |
+| Entity         | `@NoArgsConstructor` → `@Data` → `@Entity` → `@Table(name = "{도메인}_tb")` |
+| Service        | `@Transactional(readOnly = true)` → `@RequiredArgsConstructor` → `@Service`  |
+| Controller     | `@RequiredArgsConstructor` → `@Controller`                                   |
+| RestController | `@RequiredArgsConstructor` → `@RestController` (별도 파일, `/api` 접두사)    |
 
-```java
-@NoArgsConstructor
-@Data
-@Entity
-@Table(name = "board_tb")          // 테이블명: {도메인}_tb
-public class Board {
+## Entity 규칙
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;             // PK 타입: Integer
-
-    private String title;
-    private String content;
-
-    @ManyToOne(fetch = FetchType.LAZY)  // 모든 연관관계는 LAZY
-    private User user;
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Builder                        // @Builder는 클래스가 아닌 생성자에 선언
-    public Board(Integer id, String title, String content, User user, LocalDateTime createdAt) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
-        this.user = user;
-        this.createdAt = createdAt;
-        // 컬렉션(List 등)은 Builder 생성자에 포함하지 않는다
-    }
-}
-```
-
-**규칙 요약**
-- 어노테이션 순서: `@NoArgsConstructor` → `@Data` → `@Entity` → `@Table`
-- 테이블명: `{도메인}_tb`
-- PK 타입: `Integer`
-- `@Builder`는 전체 필드 생성자에만 선언 (클래스 레벨 금지)
-- 컬렉션 필드는 `@Builder` 생성자에 포함하지 않는다
+- PK 타입: `Integer`, 전략: `GenerationType.IDENTITY`
+- `@Builder`는 생성자에 선언 (클래스 레벨 금지), 컬렉션 필드 제외
 - 모든 연관관계: `FetchType.LAZY`
 - 생성일: `@CreationTimestamp` + `LocalDateTime createdAt`
 
----
+## Service 규칙
 
-## 3. Repository
+- 클래스 레벨 `@Transactional(readOnly = true)`, 쓰기 메서드만 `@Transactional`
+- DTO는 Service에서 생성 → Controller로 Entity 직접 전달 금지
 
-```java
-public interface BoardRepository extends JpaRepository<Board, Integer> {
-    // JpaRepository<Entity, PK타입>
-}
-```
+## Controller 규칙
 
----
+- SSR: `{Domain}Controller` → Mustache 템플릿 경로 반환
+- REST: `{Domain}ApiController` → `Resp.ok(body)` / `Resp.fail(status, msg)` 반환
+- SSR과 REST는 반드시 별도 파일로 분리
 
-## 4. Service
+## DTO 규칙
 
-```java
-@Transactional(readOnly = true)     // 클래스 레벨에 readOnly 기본 적용
-@RequiredArgsConstructor
-@Service
-public class BoardService {
+- `{Domain}Request.java` — 내부 static class를 기능명으로 (`Save`, `Update`)
+- `{Domain}Response.java` — 내부 static class를 용도명으로 (`Detail`, `Items`)
+- 외부 클래스: 어노테이션 없음 / 내부 클래스: `@Data`
+- Entity → DTO 변환: 생성자 또는 정적 팩토리 메서드
 
-    private final BoardRepository boardRepository;
+## 공통 응답
 
-    // DTO는 Service에서 생성하여 반환한다
-    // Entity를 Controller로 직접 전달하지 않는다
-    @Transactional                  // 쓰기 작업에만 별도 선언
-    public void save(BoardRequest.Save req) {
-        ...
-    }
-}
-```
+`_core/utils/Resp.java` — REST API는 반드시 `Resp<T>` 래퍼 사용
 
-**규칙 요약**
-- 어노테이션 순서: `@Transactional(readOnly = true)` → `@RequiredArgsConstructor` → `@Service`
-- 클래스 레벨에 `@Transactional(readOnly = true)` 기본 적용
-- 쓰기 메서드에만 `@Transactional` 별도 선언
-- **DTO는 Service에서 만든다**
-- **Entity는 Controller로 전달하지 않는다**
+## 프론트 (JS) 규칙
 
----
+- Ajax(fetch)는 `async` / `await` 사용
+- DOM 접근: `document.querySelector` 사용
+- POST 요청 기본: `<form>` 태그 + `name` 속성으로 제출 (페이지 이동 방식)
+- Ajax가 필요한 경우만 fetch 사용 (중복체크, 부분 갱신 등)
 
-## 5. Controller
+## 네이밍
 
-```java
-@RequiredArgsConstructor
-@Controller
-public class BoardController {
+| 대상        | 규칙               | 예시             |
+| ----------- | ------------------ | ---------------- |
+| 클래스/파일 | PascalCase         | `BoardService`   |
+| 메서드/변수 | camelCase          | `findAll`        |
+| 테이블      | snake_case + `_tb` | `board_tb`       |
+| 패키지      | lowercase          | `board`, `_core` |
 
-    private final BoardService boardService;
-    private final HttpSession session;
+## 설정
 
-    @GetMapping("/boards")
-    public String index(Model model) {
-        model.addAttribute("boards", boardService.findAll());
-        return "board/index";       // Mustache 템플릿 경로 반환
-    }
-}
-```
-
-**규칙 요약**
-- 어노테이션 순서: `@RequiredArgsConstructor` → `@Controller`
-- 의존성: Service, HttpSession 주입
-- 반환값: Mustache 템플릿 경로(String)
-- REST API의 경우 `@RestController` 사용 후 `Resp.ok()` / `Resp.fail()` 반환
-
----
-
-## 6. Request DTO
-
-```java
-public class BoardRequest {          // 외부 클래스: 어노테이션 없음
-
-    @Data
-    public static class Save {       // 내부 정적 클래스: 기능명으로 명명
-        private String title;
-        private String content;
-    }
-
-    @Data
-    public static class Update {
-        private String title;
-        private String content;
-    }
-}
-```
-
-**규칙 요약**
-- 파일명: `{Domain}Request.java`
-- 외부 클래스에는 어노테이션 없음
-- 내부 static class 이름: 기능명 (`Save`, `Update`, `Delete` 등)
-- 내부 클래스에만 `@Data` 선언
-
----
-
-## 7. Response DTO
-
-```java
-public class BoardResponse {         // 외부 클래스: 어노테이션 없음
-
-    @Data
-    public static class Detail {     // 상세 조회용
-        private Integer id;
-        private String title;
-        private String content;
-        // 생성자 또는 정적 팩토리 메서드로 Entity → DTO 변환
-    }
-
-    @Data
-    public static class Items {      // 목록 조회용
-        private Integer id;
-        private String title;
-    }
-}
-```
-
-**규칙 요약**
-- 파일명: `{Domain}Response.java`
-- 외부 클래스에는 어노테이션 없음
-- 내부 static class 이름: 용도명 (`Detail`, `Items` 등)
-- Entity → DTO 변환은 생성자 또는 정적 팩토리 메서드 사용
-
----
-
-## 8. 공통 응답 (Resp)
-
-```java
-// 성공 응답
-return Resp.ok(body);               // { status: 200, msg: "성공", body: ... }
-
-// 실패 응답
-return Resp.fail(HttpStatus.BAD_REQUEST, "에러 메시지");
-```
-
-- 위치: `_core/utils/Resp.java`
-- REST API 응답은 반드시 `Resp<T>` 래퍼 사용
-
----
-
-## 9. 네이밍 규칙
-
-| 대상 | 규칙 | 예시 |
-|------|------|------|
-| 클래스 | PascalCase | `BoardService` |
-| 메서드/변수 | camelCase | `findAll`, `createdAt` |
-| 테이블명 | snake_case + `_tb` | `board_tb`, `user_tb` |
-| 파일명 | PascalCase | `BoardController.java` |
-| 패키지명 | lowercase | `board`, `user`, `_core` |
-
----
-
-## 10. 기타 규칙
-
-- **OSIV**: `spring.jpa.open-in-view=false`
-- **Fetch 전략**: 모든 연관관계 `FetchType.LAZY` (기본 EAGER 사용 금지)
-- **배치 사이즈**: `default_batch_fetch_size=10` (N+1 최적화)
-- **세션 방식 인증**: `HttpSession` 사용
+- OSIV: `false`
+- Fetch: 전부 `LAZY`
+- Batch: `default_batch_fetch_size=10`
+- 인증: `HttpSession`

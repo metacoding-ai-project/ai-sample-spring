@@ -22,7 +22,8 @@ com.example.demo/
   _core/utils/       ← 도메인 무관 공통 유틸 (Resp.java 등)
   {domain}/          ← 해당 도메인의 모든 파일을 한 폴더에 (플랫)
     {Domain}.java
-    {Domain}Controller.java
+    {Domain}Controller.java       ← SSR (Mustache)
+    {Domain}ApiController.java    ← REST API (/api 접두사)
     {Domain}Service.java
     {Domain}Repository.java
     {Domain}Request.java
@@ -120,7 +121,8 @@ public class {Domain}Service {
 ## 컨트롤러 규칙
 
 ```java
-// 어노테이션 순서: @RequiredArgsConstructor → @Controller (또는 @RestController)
+// SSR 컨트롤러 — Mustache 뷰 반환
+// 어노테이션 순서: @RequiredArgsConstructor → @Controller
 @RequiredArgsConstructor
 @Controller
 public class {Domain}Controller {
@@ -128,14 +130,23 @@ public class {Domain}Controller {
     private final {Domain}Service {domain}Service;
     private final HttpSession session;
 
-    // Mustache 뷰: 템플릿 경로를 String으로 반환
     @GetMapping("/{domain}s")
     public String index(Model model) {
         model.addAttribute("items", {domain}Service.findAll());
         return "{domain}/index";
     }
+}
+```
 
-    // REST API: @RestController + Resp 래퍼 사용
+```java
+// REST 컨트롤러 — 반드시 별도 파일로 분리, 주소에 /api 접두사 사용
+// 어노테이션 순서: @RequiredArgsConstructor → @RestController
+@RequiredArgsConstructor
+@RestController
+public class {Domain}ApiController {
+
+    private final {Domain}Service {domain}Service;
+
     @GetMapping("/api/{domain}s/{id}")
     public ResponseEntity<?> detail(@PathVariable Integer id) {
         return Resp.ok({domain}Service.findById(id));
@@ -144,9 +155,13 @@ public class {Domain}Controller {
 ```
 
 **반드시 지킬 것**
-- Service와 함께 `HttpSession`을 생성자로 주입
+- SSR(`@Controller`)과 REST(`@RestController`)는 **별도 파일로 분리**한다
+  - SSR: `{Domain}Controller.java`
+  - REST: `{Domain}ApiController.java`
+- REST 컨트롤러의 모든 엔드포인트 주소는 `/api`를 접두사로 붙인다
+- Service와 함께 `HttpSession`을 생성자로 주입 (SSR 컨트롤러)
 - Mustache 컨트롤러: 반환값은 `String` (템플릿 경로)
-- REST 컨트롤러: `@RestController` + `Resp.ok()` / `Resp.fail()` 사용
+- REST 컨트롤러: `Resp.ok()` / `Resp.fail()` 사용
 
 ---
 
@@ -229,6 +244,16 @@ return Resp.fail(HttpStatus.UNAUTHORIZED, "오류 메시지");
 
 - 위치: `_core/utils/Resp.java`
 - 모든 REST API 응답은 반드시 `Resp<T>` 래퍼 사용 — 날(raw) 반환 금지
+
+---
+
+## 프론트엔드 (JavaScript) 규칙
+
+- Ajax 호출(fetch)은 반드시 `async` / `await`으로 작성한다
+- DOM 요소 접근은 `document.querySelector`만 사용한다 (`getElementById` 등 금지)
+- POST 요청 방식:
+  - **기본**: `<form>` 태그 + `name` 속성으로 서버에 직접 제출 (페이지 이동 방식, `x-www-form-urlencoded`)
+  - **예외**: Ajax가 필요한 경우(중복체크, 부분 갱신 등)에만 `fetch` 사용
 
 ---
 
