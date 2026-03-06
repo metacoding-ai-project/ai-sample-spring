@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(antigravity --install-extension /tmp/redhat-java-1.53.vsix --force)"
+    ]
+  }
+}
