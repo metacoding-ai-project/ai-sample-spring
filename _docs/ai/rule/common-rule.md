@@ -88,8 +88,6 @@ com.example.demo/
 
 ## 프론트엔드 (JavaScript) 규칙
 
-- Ajax(fetch)는 `async` / `await` 사용
-- DOM 접근: `document.querySelector` 사용 (`getElementById` 등 금지)
 - POST 요청 기본: `<form>` 태그 + `name` 속성으로 제출 (페이지 이동 방식)
 - Ajax가 필요한 경우만 fetch 사용 (중복체크, 부분 갱신 등)
 
