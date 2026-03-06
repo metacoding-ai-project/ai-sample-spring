@@ -1,6 +1,7 @@
 # 코드 컨벤션
 
 이 프로젝트의 소스 파일을 생성하거나 수정할 때 반드시 이 컨벤션을 따른다.
+각 레이어의 상세 코드 템플릿과 예시는 `_docs/.ai/skill/` 폴더의 해당 skill을 참조한다.
 
 ---
 
@@ -36,36 +37,6 @@ com.example.demo/
 
 ## Entity 규칙
 
-```java
-@NoArgsConstructor
-@Data
-@Entity
-@Table(name = "{domain}_tb")
-public class {Domain} {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;         // PK 타입은 항상 Integer
-
-    // ... 필드 ...
-
-    // 모든 연관관계는 반드시 LAZY
-    @ManyToOne(fetch = FetchType.LAZY)
-    private OtherEntity other;
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    // @Builder는 생성자에만 선언, 클래스 레벨 금지
-    @Builder
-    public {Domain}(Integer id, ..., LocalDateTime createdAt) {
-        this.id = id;
-        // 컬렉션(List, Set) 필드는 생성자에 포함하지 않는다
-    }
-}
-```
-
-**반드시 지킬 것**
 - PK 타입: `Integer` (`Long` 사용 금지), 전략: `GenerationType.IDENTITY`
 - `@Builder`는 생성자에만 — 클래스 레벨 선언 금지
 - 컬렉션 필드(`List`, `Set`)는 `@Builder` 생성자에 포함하지 않는다
@@ -77,29 +48,6 @@ public class {Domain} {
 
 ## Service 규칙
 
-```java
-@Transactional(readOnly = true)
-@RequiredArgsConstructor
-@Service
-public class {Domain}Service {
-
-    private final {Domain}Repository {domain}Repository;
-
-    // 읽기 메서드: 추가 어노테이션 불필요 (클래스 레벨 readOnly=true 상속)
-    public {Domain}Response.Max findById(Integer id) {
-        {Domain} entity = {domain}Repository.findById(id).orElseThrow(...);
-        return new {Domain}Response.Max(entity);  // DTO 변환은 여기서
-    }
-
-    // 쓰기 메서드: @Transactional 별도 선언 필수
-    @Transactional
-    public void save({Domain}Request.Save req) {
-        ...
-    }
-}
-```
-
-**반드시 지킬 것**
 - 클래스 레벨 `@Transactional(readOnly = true)` 항상 선언
 - 쓰기 메서드(`save`, `update`, `delete`)에는 `@Transactional` 개별 선언
 - DTO는 Service 안에서 생성하여 반환 — 날(raw) Entity를 Controller로 전달 금지
@@ -108,39 +56,6 @@ public class {Domain}Service {
 
 ## Controller 규칙
 
-```java
-// SSR 컨트롤러 — Mustache 뷰 반환
-@RequiredArgsConstructor
-@Controller
-public class {Domain}Controller {
-
-    private final {Domain}Service {domain}Service;
-    private final HttpSession session;
-
-    @GetMapping("/{domain}s")
-    public String index(Model model) {
-        model.addAttribute("items", {domain}Service.findAll());
-        return "{domain}/index";
-    }
-}
-```
-
-```java
-// REST 컨트롤러 — 반드시 별도 파일로 분리, 주소에 /api 접두사 사용
-@RequiredArgsConstructor
-@RestController
-public class {Domain}ApiController {
-
-    private final {Domain}Service {domain}Service;
-
-    @GetMapping("/api/{domain}s/{id}")
-    public ResponseEntity<?> detail(@PathVariable Integer id) {
-        return Resp.ok({domain}Service.findById(id));
-    }
-}
-```
-
-**반드시 지킬 것**
 - SSR(`@Controller`)과 REST(`@RestController`)는 **별도 파일로 분리**
 - REST 엔드포인트 주소는 `/api` 접두사 필수
 - SSR: `HttpSession` 생성자 주입, 반환값 `String` (템플릿 경로)
@@ -150,86 +65,6 @@ public class {Domain}ApiController {
 
 ## DTO 규칙
 
-### 요청 DTO
-
-```java
-// 외부 클래스: 어노테이션 없음
-public class {Domain}Request {
-
-    @Data                          // @Data는 내부 클래스에만
-    public static class Save {     // 이름 = 기능명 (Save, Update, Login, Join ...)
-        private String field1;
-        private String field2;
-    }
-
-    @Data
-    public static class Update {
-        private String field1;
-    }
-}
-```
-
-### 응답 DTO
-
-```java
-// 외부 클래스: 어노테이션 없음
-public class {Domain}Response {
-
-    @Data
-    public static class Max {      // 테이블 전체 컬럼 (상세·목록 겸용)
-        private Integer id;
-        private String title;
-        private String content;
-        private LocalDateTime createdAt;
-
-        public Max({Domain} entity) {
-            this.id = entity.getId();
-            this.title = entity.getTitle();
-            this.content = entity.getContent();
-            this.createdAt = entity.getCreatedAt();
-        }
-    }
-
-    @Data
-    public static class Min {      // 최소 정보 (id + 대표값, 세션 저장 등)
-        private Integer id;
-        private String title;
-
-        public Min({Domain} entity) {
-            this.id = entity.getId();
-            this.title = entity.getTitle();
-        }
-    }
-
-    @Data
-    public static class Detail {   // 조인 포함 확장 정보
-        private Integer id;
-        private String title;
-        private String content;
-        private String username;   // 조인된 User 정보
-
-        public Detail({Domain} entity) {
-            this.id = entity.getId();
-            this.title = entity.getTitle();
-            this.content = entity.getContent();
-            this.username = entity.getUser().getUsername();
-        }
-    }
-
-    @Data
-    public static class Option {   // 셀렉트박스/드롭다운용
-        private Integer id;
-        private String name;
-
-        public Option({Domain} entity) {
-            this.id = entity.getId();
-            this.name = entity.getTitle();
-        }
-    }
-}
-```
-
-**반드시 지킬 것**
 - 도메인당 파일 하나씩: `{Domain}Request.java`, `{Domain}Response.java`
 - 외부 클래스에는 어노테이션 없음 / `@Data`는 내부 static class에만
 - Request 내부 클래스 이름: 기능명 (`Save`, `Update`, `Login`, `Join`)
@@ -244,12 +79,9 @@ public class {Domain}Response {
 
 ## 공통 응답
 
-```java
-return Resp.ok(dto);                                    // 성공: status 200
-return Resp.fail(HttpStatus.BAD_REQUEST, "오류 메시지");  // 실패
-```
-
 - 위치: `_core/utils/Resp.java`
+- 성공: `Resp.ok(dto)` (status 200)
+- 실패: `Resp.fail(HttpStatus.BAD_REQUEST, "오류 메시지")`
 - 모든 REST API 응답은 반드시 `Resp<T>` 래퍼 사용 — 날(raw) 반환 금지
 
 ---

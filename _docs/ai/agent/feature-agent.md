@@ -2,7 +2,7 @@
 
 ## 역할
 
-`_docs/.person/workflow.md`의 "아이디 중복체크" 기능을 아래 skill 조합으로 구현한다.
+`_docs/person/workflow.md`의 "아이디 중복체크" 기능을 아래 skill 조합으로 구현한다.
 
 ## skill 조합
 
@@ -20,7 +20,7 @@
 
 ### Step 1. service-skill
 
-`_docs/.ai/skill/service-skill.md`를 읽고 아래 작업을 수행한다:
+`_docs/ai/skill/service-skill.md`를 읽고 아래 작업을 수행한다:
 
 - 파일: `user/UserService.java`
 - 메서드 추가: `usernameCheck(String username)`
@@ -29,7 +29,7 @@
 
 ### Step 2. api-controller-skill
 
-`_docs/.ai/skill/api-controller-skill.md`를 읽고 아래 작업을 수행한다:
+`_docs/ai/skill/api-controller-skill.md`를 읽고 아래 작업을 수행한다:
 
 - 파일: `user/UserApiController.java` (새로 생성)
 - 엔드포인트: `GET /api/users/username-check?username=xxx`
@@ -38,14 +38,14 @@
 
 ### Step 3. ssr-controller-skill
 
-`_docs/.ai/skill/ssr-controller-skill.md`를 읽고 아래 작업을 수행한다:
+`_docs/ai/skill/ssr-controller-skill.md`를 읽고 아래 작업을 수행한다:
 
 - 파일: `user/UserController.java`
 - 메서드 추가: `GET /users/join` → `return "user/join"`
 
 ### Step 4. mustache-view-skill
 
-`_docs/.ai/skill/mustache-view-skill.md`를 읽고 아래 작업을 수행한다:
+`_docs/ai/skill/mustache-view-skill.md`를 읽고 아래 작업을 수행한다:
 
 - 파일: `templates/user/join.mustache` (새로 생성)
 - 회원가입 폼: username(+중복확인 버튼), password, email, 제출 버튼
@@ -55,7 +55,7 @@
 
 ### Step 5. ajax-skill
 
-`_docs/.ai/skill/ajax-skill.md`를 읽고 아래 작업을 수행한다:
+`_docs/ai/skill/ajax-skill.md`를 읽고 아래 작업을 수행한다:
 
 - 위치: `join.mustache`의 `<script>` 블록 안
 - 함수: `async function usernameCheck()`
