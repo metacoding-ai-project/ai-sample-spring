@@ -1,4 +1,6 @@
-# 아이디(username) 중복체크 기능
+# 이름 : username-check-workflow
+
+## 기능 : 아이디(username) 중복체크 기능
 
 ## 개요
 

@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(./gradlew --version)",
-      "Bash(./gradlew build)"
+      "Bash(./gradlew build)",
+      "Bash(python _docs/ai/skill/screenshot-skill/script/screenshot.py --base-url http://localhost:8080 --name username-check --output _docs/person/report/username-check-report/images/ --project-dir . --scenarios '[{\"\"url\"\": \"\"/users/join\"\", \"\"actions\"\": [], \"\"wait\"\": 500}, {\"\"url\"\": \"\"/users/join\"\", \"\"actions\"\": [{\"\"type\"\": \"\"fill\"\", \"\"selector\"\": \"\"#username\"\", \"\"value\"\": \"\"ssar\"\"}, {\"\"type\"\": \"\"click\"\", \"\"selector\"\": \"\"button[onclick]\"\"}], \"\"wait\"\": 1500}, {\"\"url\"\": \"\"/users/join\"\", \"\"actions\"\": [{\"\"type\"\": \"\"fill\"\", \"\"selector\"\": \"\"#username\"\", \"\"value\"\": \"\"newuser\"\"}, {\"\"type\"\": \"\"click\"\", \"\"selector\"\": \"\"button[onclick]\"\"}], \"\"wait\"\": 1500}]')",
+      "Bash(curl -s http://localhost:8080)",
+      "Bash(curl -s \"http://localhost:8080/api/users/username-check?username=ssar\")",
+      "Bash(python -c \":*)"
     ]
   }
 }

@@ -58,7 +58,7 @@ python _docs/ai/skill/screenshot-skill/script/screenshot.py \
 
 ### 2. 전체 흐름
 
-Mermaid 다이어그램(sequenceDiagram 또는 flowchart)으로 전체 실행 흐름을 그린다.
+텍스트 다이어그램(ASCII)으로 전체 실행 흐름을 그린다. Mermaid는 사용하지 않는다.
 
 ### 3. 실행 흐름 설명
 

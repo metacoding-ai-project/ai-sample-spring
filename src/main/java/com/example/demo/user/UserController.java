@@ -13,4 +13,8 @@ public class UserController {
     private final UserService userService;
     private final HttpSession session;
 
+    @GetMapping("/users/join")
+    public String joinForm() {
+        return "user/join";
+    }
 }
