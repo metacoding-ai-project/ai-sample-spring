@@ -9,3 +9,11 @@
 - `_docs/ai/skill/{스킬명}-skill/skill.md` — 스킬들 (제목, 트리거만 읽기)
 
 ---
+
+## 2. 자동 실행 Agent
+
+코드 파일(`.java`, `.mustache`, `.html`, `.js`)을 생성/수정한 직후, 아래 agent를 자동 실행한다.
+
+- `_docs/ai/agent/log-agent.md` — 변경된 파일과 사용된 skill을 `_docs/person/log/`에 기록
+
+---
