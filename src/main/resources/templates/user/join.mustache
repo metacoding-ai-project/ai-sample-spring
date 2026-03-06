@@ -23,12 +23,6 @@
             let username = document.querySelector("#username").value;
             let msgEl = document.querySelector("#username-msg");
 
-            if (username.trim() === "") {
-                msgEl.innerText = "아이디를 입력해주세요.";
-                msgEl.style.color = "red";
-                return;
-            }
-
             try {
                 let response = await fetch(`/api/users/username-check?username=${username}`);
                 let result = await response.json();
