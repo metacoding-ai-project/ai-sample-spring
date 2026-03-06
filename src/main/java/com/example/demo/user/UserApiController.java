@@ -15,9 +15,4 @@ public class UserApiController {
 
     private final UserService userService;
 
-    @GetMapping("/api/users/username-check")
-    public ResponseEntity<?> usernameCheck(@RequestParam("username") String username) {
-        boolean isDuplicate = userService.usernameCheck(username);
-        return Resp.ok(isDuplicate);
-    }
 }
