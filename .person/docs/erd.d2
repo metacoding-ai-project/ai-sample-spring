@@ -1,0 +1,61 @@
+direction: right
+layout: dagre
+theme: 0
+
+USER: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  username: string {constraint: unique}
+  password: string
+  email: string
+  postcode: string
+  address: string
+  detailAddress: string
+  extraAddress: string
+  createdAt: datetime
+}
+
+BOARD: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  title: string
+  content: string
+  userId: int {constraint: foreign_key}
+  createdAt: datetime
+}
+
+REPLY: {
+  shape: sql_table
+  id: int {constraint: primary_key}
+  comment: string
+  userId: int {constraint: foreign_key}
+  boardId: int {constraint: foreign_key}
+  createdAt: datetime
+}
+
+USER.id -> BOARD.userId: writes {style: {stroke-width: 2}}
+USER.id -> REPLY.userId: writes {style: {stroke-width: 2}}
+BOARD.id -> REPLY.boardId: contains {style: {stroke-width: 2}}
+
+# 엔티티 상세 설명
+# 2.1 User (사용자)
+# - id: 기본키 (Identity)
+# - username: 아이디 (고유값)
+# - password: 비밀번호
+# - email: 이메일
+# - postcode, address, detailAddress, extraAddress: 주소 정보
+# - createdAt: 생성일시
+
+# 2.2 Board (게시글)
+# - id: 기본키 (Identity)
+# - title: 제목
+# - content: 내용
+# - userId: 작성자 외래키 (User와 N:1 관계)
+# - createdAt: 생성일시
+
+# 2.3 Reply (댓글)
+# - id: 기본키 (Identity)
+# - comment: 댓글 내용
+# - userId: 작성자 외래키 (User와 N:1 관계)
+# - boardId: 게시글 외래키 (Board와 N:1 관계)
+# - createdAt: 생성일시
