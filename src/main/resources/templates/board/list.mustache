@@ -1,0 +1,24 @@
+{{> layout/header}}
+
+<div class="container p-5">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>상세보기</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#boardList}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{title}}</td>
+                <td><a href="/board/{{id}}" class="btn btn-primary">상세보기</a></td>
+            </tr>
+        {{/boardList}}
+        </tbody>
+    </table>
+</div>
+
+{{> layout/footer}}
