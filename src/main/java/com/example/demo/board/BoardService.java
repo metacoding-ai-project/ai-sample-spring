@@ -3,6 +3,7 @@ package com.example.demo.board;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.example.demo._core.handler.ex.Exception404;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,14 +18,18 @@ import lombok.RequiredArgsConstructor;
 public class BoardService {
     private final BoardRepository boardRepository;
 
-    public List<BoardResponse.ListDTO> 게시글목록보기(int page) {
+    public BoardResponse.ListDTO 게시글목록보기(int page) {
         int limit = 3; // 한 페이지에 보여줄 개수
         int offset = page * limit; // 시작 인덱스
 
         var boardList = boardRepository.findAll(limit, offset);
-        return boardList.stream()
-                .map(BoardResponse.ListDTO::new)
-                .collect(Collectors.toList());
+        var totalCount = boardRepository.countAll();
+
+        if (boardList.isEmpty() && page > 0) {
+            throw new Exception404("더 이상 게시글이 없습니다.");
+        }
+
+        return new BoardResponse.ListDTO(boardList, page, totalCount, limit);
     }
 
 }

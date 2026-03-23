@@ -14,4 +14,7 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
 
     @Query("SELECT b FROM Board b ORDER BY b.id DESC LIMIT :limit OFFSET :offset")
     List<Board> findAll(@Param("limit") int limit, @Param("offset") int offset);
+
+    @Query("SELECT COUNT(b) FROM Board b")
+    Long countAll();
 }

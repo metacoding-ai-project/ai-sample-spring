@@ -16,10 +16,13 @@ public class BoardController {
     private final HttpSession session;
 
     @GetMapping("/")
-    public String list(@RequestParam(defaultValue = "0", name = "page") int page, Model model) {
-        var boardList = boardService.게시글목록보기(page);
-        model.addAttribute("boardList", boardList);
-        model.addAttribute("page", page); // 현재 페이지 번호 전달
+    public String list(@RequestParam(defaultValue = "1", name = "page") int page, Model model) {
+        if (page < 1) {
+            return "redirect:/?page=1";
+        }
+        var responseDTO = boardService.게시글목록보기(page - 1);
+        model.addAttribute("model", responseDTO);
+
         return "board/list";
     }
 }

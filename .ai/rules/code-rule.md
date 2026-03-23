@@ -32,24 +32,19 @@ com.example.demo/
 - 조회 메서드는 `@Transactional(readOnly = true)`를 사용한다.
 - 쓰기 메서드(save, update, delete)는 `@Transactional`을 사용한다.
 - DTO는 Service 레이어에서 변환하며, Entity를 Controller로 노출하지 않는다.
+- 화면(Mustache) 응답에 필요한 모든 데이터는 Service에서 하나의 DTO(가방)에 담아서 반환한다.
 
-## 5. Controller Rules
-- SSR(@Controller)과 REST(@RestController)를 명확히 분리한다.
-- REST API 경로는 `/api`로 시작한다.
-- SSR은 `HttpSession`을 사용하고 `String`을 반환한다.
-- REST는 `Resp.ok()` 또는 `Resp.fail()`을 사용한다.
-
-## 6. DTO Rules
+## 5. DTO Rules
 - 파일명 형식: `{Domain}Request.java`, `{Domain}Response.java`
 - 내부 클래스를 활용하여 static class로 선언한다.
 - Request 클래스명은 기능명(Save, Update, Login, Join)을 사용한다.
 - Response 클래스명은 데이터 범위를 기준으로 한다 (Max, Min, Detail).
 
-## 7. JavaScript Rules
+## 6. JavaScript Rules
 - 기본적으로 `<form>` 태그와 `name` 속성을 이용한 POST 요청을 우선한다.
 - 중복 체크나 부분 갱신 등 필요한 경우에만 `fetch` (Ajax)를 사용한다.
 
-## 8. H2 Console Configuration (Jakarta EE)
+## 7. H2 Console Configuration (Jakarta EE)
 Spring Boot 4.x 이상(Jakarta EE)에서는 H2 콘솔을 정적 리소스로 오인하여 발생하는 `No static resource` 오류를 방지하기 위해 반드시 `JakartaWebServlet`을 사용하여 수동으로 등록한다.
 
 - `ServletRegistrationBean<JakartaWebServlet>`을 사용하여 `/h2-console/*` 경로를 매핑한다.

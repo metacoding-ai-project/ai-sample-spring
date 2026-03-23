@@ -1,7 +1,7 @@
 {{> layout/header}}
 
 <div class="container p-5">
-    <h3>게시글 목록 (현재 페이지: {{page}})</h3>
+    <h3>게시글 목록 (현재 페이지: {{model.page}})</h3>
     <table class="table table-striped">
         <thead>
         <tr>
@@ -11,15 +11,25 @@
         </tr>
         </thead>
         <tbody>
-        {{#boardList}}
+        {{#model.boards}}
             <tr>
                 <td>{{id}}</td>
                 <td>{{title}}</td>
                 <td><a href="/board/{{id}}" class="btn btn-primary">상세보기</a></td>
             </tr>
-        {{/boardList}}
+        {{/model.boards}}
         </tbody>
     </table>
+
+    <ul class="pagination d-flex justify-content-center">
+        <li class="page-item {{#model.first}}disabled{{/model.first}}"><a class="page-link" href="/?page={{model.prevPage}}">Previous</a></li>
+        
+        {{#model.pageNumbers}}
+            <li class="page-item {{#active}}active{{/active}}"><a class="page-link" href="/?page={{number}}">{{number}}</a></li>
+        {{/model.pageNumbers}}
+
+        <li class="page-item {{#model.last}}disabled{{/model.last}}"><a class="page-link" href="/?page={{model.nextPage}}">Next</a></li>
+    </ul>
 </div>
 
 {{> layout/footer}}
