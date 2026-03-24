@@ -16,11 +16,13 @@ public class BoardController {
     private final HttpSession session;
 
     @GetMapping("/")
-    public String list(@RequestParam(defaultValue = "1", name = "page") int page, Model model) {
+    public String list(@RequestParam(defaultValue = "1", name = "page") int page,
+                       @RequestParam(defaultValue = "", name = "keyword") String keyword,
+                       Model model) {
         if (page < 1) {
-            return "redirect:/?page=1";
+            return "redirect:/?page=1&keyword=" + keyword;
         }
-        var responseDTO = boardService.게시글목록보기(page - 1);
+        var responseDTO = boardService.게시글목록보기(page - 1, keyword);
         model.addAttribute("model", responseDTO);
 
         return "board/list";

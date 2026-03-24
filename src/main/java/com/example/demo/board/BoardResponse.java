@@ -16,12 +16,14 @@ public class BoardResponse {
         private boolean first;
         private boolean last;
         private Integer totalPage;
+        private String keyword;
 
-        public ListDTO(List<Board> boards, Integer page, Long totalCount, int limit) {
+        public ListDTO(List<Board> boards, Integer page, Long totalCount, int limit, String keyword) {
             this.boards = boards.stream().map(BoardDTO::new).toList();
             this.page = page + 1; // 1-기반으로 변환하여 저장
             this.prevPage = page; // page - 1 + 1
             this.nextPage = page + 2; // page + 1 + 1
+            this.keyword = keyword;
 
             // 전체 페이지 수 계산
             this.totalPage = (int) Math.ceil((double) totalCount / limit);

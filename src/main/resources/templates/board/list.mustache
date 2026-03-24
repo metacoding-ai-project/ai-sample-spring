@@ -3,7 +3,13 @@
 <div class="container p-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 style="font-weight: 700; color: var(--color-dark);">게시글 목록</h3>
-        <span class="badge badge-page">페이지 {{model.page}}</span>
+        <div class="d-flex align-items-center">
+            <form action="/" method="get" class="d-flex mr-3">
+                <input class="form-control form-control-sm mr-2" type="text" name="keyword" placeholder="검색어 입력" value="{{model.keyword}}">
+                <button class="btn btn-sm btn-outline-primary" type="submit">검색</button>
+            </form>
+            <span class="badge badge-page">페이지 {{model.page}}</span>
+        </div>
     </div>
 
     <div class="card">
@@ -42,17 +48,17 @@
     <nav class="mt-4">
         <ul class="pagination justify-content-center">
             <li class="page-item {{#model.first}}disabled{{/model.first}}">
-                <a class="page-link" href="/?page={{model.prevPage}}">이전</a>
+                <a class="page-link" href="/?page={{model.prevPage}}&keyword={{model.keyword}}">이전</a>
             </li>
 
             {{#model.pageNumbers}}
                 <li class="page-item {{#active}}active{{/active}}">
-                    <a class="page-link" href="/?page={{number}}">{{number}}</a>
+                    <a class="page-link" href="/?page={{number}}&keyword={{model.keyword}}">{{number}}</a>
                 </li>
             {{/model.pageNumbers}}
 
             <li class="page-item {{#model.last}}disabled{{/model.last}}">
-                <a class="page-link" href="/?page={{model.nextPage}}">다음</a>
+                <a class="page-link" href="/?page={{model.nextPage}}&keyword={{model.keyword}}">다음</a>
             </li>
         </ul>
     </nav>

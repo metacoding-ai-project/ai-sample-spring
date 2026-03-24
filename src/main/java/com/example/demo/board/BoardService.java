@@ -18,20 +18,26 @@ import lombok.RequiredArgsConstructor;
 public class BoardService {
     private final BoardRepository boardRepository;
 
-    public BoardResponse.ListDTO 게시글목록보기(int page) {
+    public BoardResponse.ListDTO 게시글목록보기(int page, String keyword) {
         int limit = 3; // 한 페이지에 보여줄 개수
         int offset = page * limit; // 시작 인덱스 [0, 3]
 
-        var boardList = boardRepository.findAll(limit, offset); // (3, 0)
-        var totalCount = boardRepository.countAll(); // 20개
+        List<Board> boardList;
+        Long totalCount;
+
+        if (keyword == null || keyword.isBlank()) {
+            boardList = boardRepository.findAll(limit, offset);
+            totalCount = boardRepository.countAll();
+        } else {
+            boardList = boardRepository.findAllByKeyword(keyword, limit, offset);
+            totalCount = boardRepository.countByKeyword(keyword);
+        }
 
         if (boardList.isEmpty() && page > 0) {
             throw new Exception404("더 이상 게시글이 없습니다.");
         }
 
-        // page=1
-        // [20, 19, 18번 글이 들어감], page=0, totalCount = 5, limit =3
-        return new BoardResponse.ListDTO(boardList, page, totalCount, limit);
+        return new BoardResponse.ListDTO(boardList, page, totalCount, limit, keyword);
     }
 
 }
