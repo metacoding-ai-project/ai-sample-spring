@@ -1,35 +1,61 @@
 {{> layout/header}}
 
 <div class="container p-5">
-    <h3>게시글 목록 (현재 페이지: {{model.page}})</h3>
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>번호</th>
-            <th>제목</th>
-            <th>상세보기</th>
-        </tr>
-        </thead>
-        <tbody>
-        {{#model.boards}}
-            <tr>
-                <td>{{id}}</td>
-                <td>{{title}}</td>
-                <td><a href="/board/{{id}}" class="btn btn-primary">상세보기</a></td>
-            </tr>
-        {{/model.boards}}
-        </tbody>
-    </table>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 style="font-weight: 700; color: var(--color-dark);">게시글 목록</h3>
+        <span class="badge badge-page">페이지 {{model.page}}</span>
+    </div>
 
-    <ul class="pagination d-flex justify-content-center">
-        <li class="page-item {{#model.first}}disabled{{/model.first}}"><a class="page-link" href="/?page={{model.prevPage}}">Previous</a></li>
-        
-        {{#model.pageNumbers}}
-            <li class="page-item {{#active}}active{{/active}}"><a class="page-link" href="/?page={{number}}">{{number}}</a></li>
-        {{/model.pageNumbers}}
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead>
+                <tr>
+                    <th style="width: 80px;">번호</th>
+                    <th>제목</th>
+                    <th style="width: 120px; text-align: center;">상세보기</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{#model.boards}}
+                    <tr>
+                        <td style="color: var(--color-text-muted);">{{id}}</td>
+                        <td>{{title}}</td>
+                        <td class="text-center">
+                            <a href="/board/{{id}}" class="btn btn-sm btn-outline-primary">보기</a>
+                        </td>
+                    </tr>
+                {{/model.boards}}
+                {{^model.boards}}
+                    <tr>
+                        <td colspan="3" class="text-center empty-state">
+                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                            게시글이 없습니다.
+                        </td>
+                    </tr>
+                {{/model.boards}}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-        <li class="page-item {{#model.last}}disabled{{/model.last}}"><a class="page-link" href="/?page={{model.nextPage}}">Next</a></li>
-    </ul>
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {{#model.first}}disabled{{/model.first}}">
+                <a class="page-link" href="/?page={{model.prevPage}}">이전</a>
+            </li>
+
+            {{#model.pageNumbers}}
+                <li class="page-item {{#active}}active{{/active}}">
+                    <a class="page-link" href="/?page={{number}}">{{number}}</a>
+                </li>
+            {{/model.pageNumbers}}
+
+            <li class="page-item {{#model.last}}disabled{{/model.last}}">
+                <a class="page-link" href="/?page={{model.nextPage}}">다음</a>
+            </li>
+        </ul>
+    </nav>
 </div>
 
 {{> layout/footer}}

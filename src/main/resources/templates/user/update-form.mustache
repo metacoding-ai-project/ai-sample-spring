@@ -1,80 +1,14 @@
 {{> layout/header}}
 
-<style>
-    :root {
-        --color-primary: #197fe6;
-        --radius-base: 12px;
-        --shadow-base: 0 4px 20px rgba(0,0,0,0.05);
-        --font-family-base: 'Plus Jakarta Sans', 'Pretendard', sans-serif;
-    }
-
-    body {
-        font-family: var(--font-family-base);
-        background-color: #f8f9fa;
-    }
-
-    .update-card {
-        border: none;
-        border-radius: var(--radius-base);
-        box-shadow: var(--shadow-base);
-        overflow: hidden;
-    }
-
-    .update-card .card-header {
-        background-color: var(--color-white);
-        border-bottom: 1px solid #eee;
-        padding: 1.5rem;
-    }
-
-    .update-card .card-body {
-        padding: 2rem;
-    }
-
-    .form-label {
-        font-weight: 500;
-        color: #495057;
-    }
-
-    .form-control {
-        border-radius: 8px;
-        padding: 0.6rem 1rem;
-        border: 1px solid #dee2e6;
-    }
-
-    .form-control:focus {
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 0.25rem rgba(25, 127, 230, 0.1);
-    }
-
-    .btn-primary {
-        background-color: var(--color-primary);
-        border: none;
-        border-radius: 8px;
-        padding: 0.7rem;
-        font-weight: 600;
-    }
-
-    .danger-zone {
-        border-top: 1px solid #f5c6cb;
-        padding-top: 1.5rem;
-        margin-top: 2rem;
-    }
-
-    .btn-outline-danger {
-        border-radius: 8px;
-        font-weight: 500;
-    }
-</style>
-
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card update-card">
-                <div class="card-header text-center">
-                    <h3 class="mb-0">회원 정보 수정</h3>
-                    <p class="text-muted mt-2">변경할 정보를 입력해주세요</p>
+            <div class="card" style="overflow: hidden;">
+                <div class="card-header-form">
+                    <h3>회원 정보 수정</h3>
+                    <p>변경할 정보를 입력해주세요</p>
                 </div>
-                <div class="card-body">
+                <div class="card-body-form">
                     <form action="/user/update" method="post">
                         <!-- 아이디 (읽기 전용) -->
                         <div class="mb-4">
@@ -117,13 +51,13 @@
                         </div>
 
                         <div class="d-grid mt-5">
-                            <button class="btn btn-primary" type="submit">수정하기</button>
+                            <button class="btn btn-primary btn-lg" type="submit">수정하기</button>
                         </div>
                     </form>
 
                     <!-- 회원 탈퇴 영역 -->
                     <div class="danger-zone text-center">
-                        <p class="text-muted mb-2" style="font-size: 0.9rem;">더 이상 서비스를 이용하지 않으시겠어요?</p>
+                        <p style="color: var(--color-text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">더 이상 서비스를 이용하지 않으시겠어요?</p>
                         <button class="btn btn-outline-danger btn-sm" onclick="confirmDelete()">회원 탈퇴</button>
                     </div>
                 </div>
@@ -145,9 +79,9 @@
                 <p class="fw-bold">정말 탈퇴하시겠습니까?</p>
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px;">취소</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: var(--radius-sm);">취소</button>
                 <form action="/user/delete" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-danger" style="border-radius: 8px;">탈퇴하기</button>
+                    <button type="submit" class="btn btn-danger" style="border-radius: var(--radius-sm);">탈퇴하기</button>
                 </form>
             </div>
         </div>

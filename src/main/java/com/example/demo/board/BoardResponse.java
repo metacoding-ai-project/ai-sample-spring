@@ -30,9 +30,9 @@ public class BoardResponse {
             this.first = (page == 0);
             this.last = (this.page >= totalPage);
 
-            // 5개씩 끊어서 페이지 번호 리스트 생성
+            // 3개씩 끊어서 페이지 번호 리스트 생성
             this.pageNumbers = new ArrayList<>();
-            int startPage = (page / 5) * 5 + 1;
+            int startPage = (page / 5) * 5 + 1;  // start =1, start=6
             int endPage = Math.min(startPage + 4, totalPage);
             for (int i = startPage; i <= endPage; i++) {
                 this.pageNumbers.add(new PageNumberDTO(i, this.page == i));
